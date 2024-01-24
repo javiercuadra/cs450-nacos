@@ -11,6 +11,7 @@ import (
     "github.com/nacos-group/nacos-sdk-go/clients/naming_client"
     "github.com/nacos-group/nacos-sdk-go/common/constant"
     "github.com/nacos-group/nacos-sdk-go/vo"
+
 )
 
 // discoverHelloService uses Nacos to discover the Hello Service.

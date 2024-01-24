@@ -4,11 +4,11 @@ import (
     "fmt"
     "log"
     "net/http"
-    // other imports
-    "github.com/nacos-group/nacos-sdk-go/clients"
-    "github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-    "github.com/nacos-group/nacos-sdk-go/common/constant"
-    "github.com/nacos-group/nacos-sdk-go/vo"
+
+    // "github.com/nacos-group/nacos-sdk-go/clients"
+    // "github.com/nacos-group/nacos-sdk-go/clients/naming_client"
+    // "github.com/nacos-group/nacos-sdk-go/common/constant"
+    // "github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
