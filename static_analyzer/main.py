@@ -3,9 +3,10 @@ from typing import Dict, List
 
 from nacos_go_sdk_parser_types import Service, SDKFunctionWrapperMapping
 
-from parse_files import find_go_files, filter_files_with_nacos_import
-from parse_wrapper import find_wrappers, filter_files_with_func_wrappers
+from find_file_type import find_file_type
 from find_services import find_services
+from filter_files_without_str import filter_files_without_str
+from find_wrappers import find_wrappers
 
 def define_directory_path() -> str:
   """
@@ -50,7 +51,7 @@ def find_all_go_files(directory_path: str) -> List['str']:
       List[str]: A list of file paths, each pointing to a discovered Go file.
   """
   print(f"\n\nFinding all Go files located within {directory_path}")
-  go_files: List[str] = find_go_files(directory_path)
+  go_files: List[str] = find_file_type(directory_path, "go")
 
   for file_path in go_files:
     print(file_path)
@@ -76,7 +77,7 @@ def find_nacos_files(go_files: List['str']) -> List['str']:
                   service discovery functions. If no such files are found, the list will be empty.
   """
   print("\n\nFinding all Go files that use nacos_sdk_go's service discovery functions")
-  nacos_go_files: List['str'] = filter_files_with_nacos_import(go_files)
+  nacos_go_files: List['str'] = filter_files_without_str(go_files, "github.com/nacos-group/nacos-sdk-go/clients")
 
   for file_path in nacos_go_files:
       print(file_path)
@@ -146,7 +147,7 @@ def find_registered_services(sdk_function_wrapper_mappings: Dict[str, SDKFunctio
   for key, value in sdk_function_wrapper_mappings.items():
 
     # Search for Go files containing the wrapper function
-    wrapper_function_files: List[str] = filter_files_with_func_wrappers(go_files, key)
+    wrapper_function_files: List[str] = filter_files_without_str(go_files, key)
 
     # Identify and store the services resgistered
     service_dict.update(find_services(wrapper_function_files, key, value))
