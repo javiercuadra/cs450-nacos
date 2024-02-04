@@ -22,19 +22,19 @@ class SDKFunctionWrapperMapping:
   """
   '''
 
-  def __init__(self, func_wrapper, func_params, sdk_func_call, wrapper_to_sdk_index_map):
+  def __init__(self, wrapper_name, wrapper_params, sdk_func_call, wrapper_to_sdk_index_map):
     """
     Initializes a new instance of the Service class.
 
     Args:
-        func_wrapper (str): The name of the wrapper function.
-        func_params (List[str]): The parameters of the wrapper function.
+        wrapper_name (str): The name of the wrapper function.
+        wrapper_params (List[str]): The parameters of the wrapper function.
         sdk_func_call (str): The name of the SDK function call.
         wrapper_to_sdk_index_map (Dict[str, int]): Mapping of wrapper function parameters
             to SDK function call parameters by index.
     """
-    self.wrapper_name: str = func_wrapper
-    self.wrapper_params: List[str] = func_params
+    self.wrapper_name: str = wrapper_name
+    self.wrapper_params: List[str] = wrapper_params
     self.sdk_func_call: str = sdk_func_call
     self.wrapper_to_sdk_index_map: Dict[str, int] = wrapper_to_sdk_index_map
 

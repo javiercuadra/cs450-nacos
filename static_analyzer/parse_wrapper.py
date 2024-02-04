@@ -14,7 +14,7 @@ def find_wrappers(file):
           func_args = [arg.strip() for arg in func_args if arg.strip()]  # Cleaning and filtering empty arguments
           continue
         if "RegisterInstance" in line:
-          print(f"Found RegisterInstance in with wrapper {func_name} and args {func_args}")
+          # print(f"Found RegisterInstance with wrapper function {func_name} and args {func_args}")
 
           for j in range(i, len(lines)):
             if "ServiceName" in lines[j]:
@@ -35,7 +35,7 @@ def find_wrappers(file):
 
           dict_node = SDKFunctionWrapperMapping(func_name, func_args, "RegisterInstance", wrapper_to_sdk_index_map)
           function_dict[func_name] = dict_node
-          print(f"Function: {dict_node.wrapper_name}, Args: {dict_node.wrapper_params}, SDK Call: {dict_node.sdk_func_call}, Index Map: {dict_node.wrapper_to_sdk_index_map}")
+          # print(f"Function: {dict_node.wrapper_name}, Args: {dict_node.wrapper_params}, SDK Call: {dict_node.sdk_func_call}, Index Map: {dict_node.wrapper_to_sdk_index_map}")
 
 
 
