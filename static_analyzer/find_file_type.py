@@ -38,6 +38,6 @@ def find_file_type(starting_directory: str, file_type: str) -> List[str]:
     for directory in dirs:
 
       # Add any new files of the specified type within the subdirectory
-      go_file_paths.extend(find_file_type(directory, file_type))
+      go_file_paths.extend(find_file_type(os.path.join(root, directory), file_type))
 
   return go_file_paths

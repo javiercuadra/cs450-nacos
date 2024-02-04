@@ -1,0 +1,38 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+*.dll
+
+*_string.go
+
+go.sum
+
+config.toml
+config.*.toml
+
+include/
+lib/
+docs/
+audio/
+
+ip.data
+wire_gen.go
+
+.idea/
+.vs/
+.vscode/
+logs/
+bin/
+tmp/
+resources/
+/go.sum
+/graph/generated/generated.go

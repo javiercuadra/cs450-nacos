@@ -1,6 +1,7 @@
 from typing import List, Dict, Tuple
 import os
-from nacos_go_sdk_parser_types import SDKFunctionWrapperMapping, Service
+from nacos_go_sdk_parser_types import SDKFunctionWrapperMapping
+from filter_files_with_str import remove_single_line_comments, is_within_multiline_comment
 
 def __extract_args(line: str, wrapper_name: str) -> List[str]:
   """_summary_
@@ -20,7 +21,7 @@ def __extract_args(line: str, wrapper_name: str) -> List[str]:
 
   return args
 
-def __map_args_to_parameter(args: List[str], index_map: Dict[str, int]) -> Tuple[str, str, str]:
+def __map_args_to_parameter(args: List[str], index_map: Dict[str, int]) -> str:
   """
   Maps arguments to their corresponding service parameters based on an index mapping.
 
@@ -28,7 +29,7 @@ def __map_args_to_parameter(args: List[str], index_map: Dict[str, int]) -> Tuple
   specific service parameters: the service name, IP address, and port number. The index
   map specifies the positions of these parameters within the args list. This is useful
   for dynamically extracting parameter values from a list when the order of values is
-  known only at runtime.
+  known only at runtime. 
 
   Args:
       args (List[str]): A list of strings representing various parameters, from which
@@ -40,14 +41,14 @@ def __map_args_to_parameter(args: List[str], index_map: Dict[str, int]) -> Tuple
       Tuple[str, str, str]: A tuple containing the service name, IP address, and port number,
                               extracted based on the provided index mapping.
   """
+  if not isinstance(index_map["ServiceName"], str):
+    serviceName = args[index_map["ServiceName"]]
+  else: 
+    serviceName = index_map["ServiceName"]
 
-  serviceName = args[index_map["ServiceName"]]
-  ip = args[index_map["Ip"]]
-  port = args[index_map["Port"]]
+  return serviceName
 
-  return (serviceName, ip, port)
-
-def find_services(files: List[str], wrapper_name: str, wrapper_data: SDKFunctionWrapperMapping):
+def find_service_calls(files: List[str], wrapper_name: str, wrapper_data: SDKFunctionWrapperMapping, module_dict: Dict[str, str]):
   """
   Identifies services registered through wrapper functions in the given files.
 
@@ -74,21 +75,22 @@ def find_services(files: List[str], wrapper_name: str, wrapper_data: SDKFunction
                           and port number extracted from the wrapper function calls.
   """
 
-  service_dict: Dict[str, Service] = {}
-  module_dict: Dict[str, str] = {}
+  service_call_dict: Dict[str, str] = {}
 
   # Iterate through all the files
   for file in files:
 
     # Read the file
     with open(file, 'r', encoding='utf-8') as f:
+      inside_multiline_comment = False
       lines = f.readlines()
 
       # Iterate through all the lines in the file
       for _, line in enumerate(lines):
-
+        line = remove_single_line_comments(line)
+        inside_multiline_comment = is_within_multiline_comment(line, inside_multiline_comment)
         # Check if the wrapper function is in the line
-        if wrapper_name not in line:
+        if inside_multiline_comment or wrapper_name not in line:
           continue
 
         # Extract arguments from line
@@ -96,7 +98,7 @@ def find_services(files: List[str], wrapper_name: str, wrapper_data: SDKFunction
 
         # Extract the argument value at the index for its parameter name.
         index_map = wrapper_data.wrapper_to_sdk_index_map
-        service_name, ip, port = __map_args_to_parameter(args, index_map)
+        service_name= __map_args_to_parameter(args, index_map)
 
         module_dir = os.path.dirname(file)
         for root, dirs, files in os.walk(module_dir):
@@ -107,15 +109,15 @@ def find_services(files: List[str], wrapper_name: str, wrapper_data: SDKFunction
                       first_line = f.readline().strip()
                       # Assuming the first line is in the format "module moduleName"
                       if first_line.startswith("module "):
-                          module_name = first_line[len("module "):]
+                          callee_module_name = first_line[len("module "):]
 
         # Create and store the found  service
-        service_dict[module_name] = Service(service_name, ip, port)
-        module_dict[service_name] = module_name
-
-  return service_dict, module_dict
+        target_module = module_dict[service_name]
+        service_call_dict.update({callee_module_name: target_module})
 
 
-
+  for key, value in service_call_dict.items():
+    print(f"module {key} calls module {value}")
+  return service_call_dict
 
 

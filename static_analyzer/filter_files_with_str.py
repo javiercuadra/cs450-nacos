@@ -63,7 +63,7 @@ def contains_key_string(line: str, key_str: str) -> bool:
   """
   return key_str in line and "func" not in line
 
-def filter_files_without_str(files: List[str], key_str: str) -> List[str]:
+def filter_files_with_str(files: List[str], key_str: str) -> List[str]:
   """
   Filters a list of files to find those that contain a specified key string outside of comments.
 

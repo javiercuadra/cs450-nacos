@@ -5,7 +5,8 @@ from nacos_go_sdk_parser_types import Service, SDKFunctionWrapperMapping
 
 from find_file_type import find_file_type
 from find_services import find_services
-from filter_files_without_str import filter_files_without_str
+from find_service_calls import find_service_calls
+from filter_files_with_str import filter_files_with_str
 from find_wrappers import find_wrappers
 
 def define_directory_path() -> str:
@@ -24,7 +25,8 @@ def define_directory_path() -> str:
   """
 
   # Default directory if user just wants to test our parser
-  directory_path: str = "./example"
+  directory_path: str = "./configuration-main"
+  #directory_path: str = "./example"
 
   # Check if user gave a different directory
   if len(sys.argv) == 2:
@@ -77,14 +79,14 @@ def find_nacos_files(go_files: List['str']) -> List['str']:
                   service discovery functions. If no such files are found, the list will be empty.
   """
   print("\n\nFinding all Go files that use nacos_sdk_go's service discovery functions")
-  nacos_go_files: List['str'] = filter_files_without_str(go_files, "github.com/nacos-group/nacos-sdk-go/clients")
+  nacos_go_files: List['str'] = filter_files_with_str(go_files, "/nacos-group/nacos-sdk-go")
 
   for file_path in nacos_go_files:
       print(file_path)
 
   return nacos_go_files
 
-def find_wrapper_functions(nacos_files: List['str']) -> Dict[str, SDKFunctionWrapperMapping]:
+def find_wrapper_functions(nacos_files: List['str'], sdk_call: str) -> Dict[str, SDKFunctionWrapperMapping]:
   """
     Identifies and maps wrapper functions to their corresponding SDK function calls
     within a list of specified Go files that use Nacos SDK.
@@ -97,6 +99,7 @@ def find_wrapper_functions(nacos_files: List['str']) -> Dict[str, SDKFunctionWra
     Args:
         nacos_files (List[str]): A list of file paths, each pointing to a Go file
                                  suspected to contain Nacos SDK function calls.
+        sdk_call (str): The name of the SDK function to be wrapped 
 
     Returns:
         Dict[str, SDKFunctionWrapperMapping]: A dictionary where each key is the name of
@@ -108,8 +111,8 @@ def find_wrapper_functions(nacos_files: List['str']) -> Dict[str, SDKFunctionWra
                                               index mapping.
     """
 
-  print("\n\nFinding all function wrappers for RegisterInstance")
-  sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrappers(nacos_files)
+  print("\n\nFinding all function wrappers for " + sdk_call + " SDK call.")
+  sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrappers(nacos_files, sdk_call)
 
   for wrapper, mapping in sdk_function_wrapper_mappings.items():
     print(f"Function: {wrapper}:")
@@ -119,7 +122,7 @@ def find_wrapper_functions(nacos_files: List['str']) -> Dict[str, SDKFunctionWra
 
   return sdk_function_wrapper_mappings
 
-def find_registered_services(sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping]) -> Dict[str, Service]:
+def find_registered_services(sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping]) -> (Dict[str, Service], Dict[str, str]):
   """
     Identifies services registered in the provided directory by analyzing the
     SDK function wrapper mappings.
@@ -136,24 +139,66 @@ def find_registered_services(sdk_function_wrapper_mappings: Dict[str, SDKFunctio
 
     Returns:
         Dict[str, Service]: A dictionary of identified services, where each key is the
-            name of a service and each value is a Service object containing the service's
+            name of a module and each value is a Service object containing the service's
             name, IP address, and port number.
+        
+        Dict[str, str]: A mapping from module names to service names, where each key is the name of a module 
+            and the value is the name of the service in the module.
 
   """
 
   service_dict: Dict[str, Service] = {}
+  module_dict: Dict[str, str] = {}
 
   print("\n\nFind all the services registered in this directory")
   for key, value in sdk_function_wrapper_mappings.items():
 
     # Search for Go files containing the wrapper function
-    wrapper_function_files: List[str] = filter_files_without_str(go_files, key)
+    wrapper_function_files: List[str] = filter_files_with_str(go_files, key)
 
     # Identify and store the services resgistered
-    service_dict.update(find_services(wrapper_function_files, key, value))
+    if wrapper_function_files:
+      services, module =  find_services(wrapper_function_files, key, value)
+      service_dict.update(services)
+      module_dict.update(module)
 
   for k, v in service_dict.items():
-    print(f"{k} is located at {v.ip}:{v.port}")
+    print(f"module {k} has service name {v.service_name} located at {v.ip}:{v.port}")
+
+  return service_dict, module_dict
+
+def find_service_discovery(sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping], module_dict: Dict[str, str])->  Dict[str, str]:
+  """
+  Identifies clients in the provided directory by analyzing the
+   wrapper mappings for SDK functions related to discoverying services.
+
+  This function iterates over a dictionary of SDK function wrapper mappings
+  to find Go files that contain calls to these wrapper functions. It then
+  identifies the services being registered through these wrapper functions
+  and compiles a dictionary of these services, keyed by service name.
+
+  Args:
+      sdk_function_wrapper_mappings (Dict[str, SDKFunctionWrapperMapping]): A dictionary
+          where keys are names of wrapper functions and values are SDKFunctionWrapperMapping
+          objects, which contain details about the wrapper functions and their SDK calls.
+      module_dict (Dict[str, str]): A mapping from module names to service names, where each key is the name of a module
+
+  Returns:
+      Dict[str, str]: A dictionary of identified service discovery calls, 
+          where the key is calling module and the value is the module with the service being discovered. 
+
+"""
+  service_call_dict: Dict[str, str] = {}
+
+  for key, value in sdk_function_wrapper_mappings.items():
+      wrapper_function_files: List[str] = filter_files_with_str(go_files, key)
+      if wrapper_function_files:
+        service_calls = find_service_calls(wrapper_function_files, key, value, module_dict)
+        service_call_dict.update(service_calls)
+  
+  return service_call_dict
+
+
 
 if __name__ == "__main__":
   # Define the directory to run the parser on
@@ -166,7 +211,16 @@ if __name__ == "__main__":
   nacos_files = find_nacos_files(go_files)
 
   # Find all function wrappers for registering functions
-  sdk_function_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrapper_functions(nacos_files[1])
+  register_services_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrapper_functions(nacos_files, "RegisterInstance")
 
   # Find all services registered in the repository
-  service_dict = find_registered_services(sdk_function_wrapper_mappings)
+  service_dict, module_dict = find_registered_services(register_services_wrapper_mappings)
+
+  service_discover_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrapper_functions(nacos_files, "SelectInstance")
+  
+  service_discovery_calls = find_service_discovery(service_discover_wrapper_mappings, module_dict)
+
+
+
+
+
