@@ -1,14 +1,43 @@
 from typing import List
 
 def remove_single_line_comments(line: str) -> str:
-  """Remove single-line comments from a line of code."""
+  """
+  Removes single-line comments from a given line of code.
+
+  If a single-line comment is detected (marked by "//"), everything after
+  this marker in the line is removed. If no comment is found, the line is
+  returned unchanged.
+
+  Args:
+      line (str): The line of code from which to remove single-line comments.
+
+  Returns:
+      str: The line of code with single-line comments removed.
+  """
   comment_index = line.find("//")
   if comment_index != -1:
     return line[:comment_index]
   return line
 
 def is_within_multiline_comment(line: str, inside_multiline_comment: bool) -> bool:
-  """Check and toggle the multi-line comment state based on the current line."""
+  """
+  Determines if the current line is within a multi-line comment block.
+
+  This function checks the current line for the start ("/*") or end ("*/")
+  of a multi-line comment. The state of being inside a multi-line comment
+  is toggled based on these markers. If both markers are present on the same
+  line, it's assumed the line starts and ends a comment within itself, and
+  the state remains unchanged.
+
+  Args:
+      line (str): The current line of code to check.
+      inside_multiline_comment (bool): The current state indicating whether
+                                        the parsing is inside a multi-line comment block.
+
+  Returns:
+      bool: True if the current or subsequent lines are within a multi-line
+            comment block, False otherwise.
+  """
   if '/*' in line and '*/' in line:
     return inside_multiline_comment  # Comment starts and ends on the same line
   if '/*' in line:
@@ -18,19 +47,36 @@ def is_within_multiline_comment(line: str, inside_multiline_comment: bool) -> bo
   return inside_multiline_comment
 
 def contains_key_string(line: str, key_str: str) -> bool:
-  """Check if the line contains the key string excluding function definitions."""
+  """
+  Checks if a given line contains a specified key string, excluding function definitions.
+
+  This function searches for the presence of a specific key string within the line,
+  but ignores any occurrences within function definitions to focus only on use cases
+  outside of these definitions.
+
+  Args:
+      line (str): The line of code to search.
+      key_str (str): The key string to look for in the line.
+
+  Returns:
+      bool: True if the key string is found outside of function definitions, False otherwise.
+  """
   return key_str in line and "func" not in line
 
 def filter_files_without_str(files: List[str], key_str: str) -> List[str]:
   """
-  Filter files that contain a specific key string outside of comments.
+  Filters a list of files to find those that contain a specified key string outside of comments.
+
+  This function iterates through each provided file, reading its content to determine
+  if the key string is present outside of both single-line and multi-line comments.
+  Files that contain the key string under these conditions are included in the returned list.
 
   Args:
-      files (List[str]): A list of file paths to check.
-      key_str (str): The key string to search for in each file.
+      files (List[str]): A list of paths to files to be scanned.
+      key_str (str): The key string to search for within the files.
 
   Returns:
-      List[str]: A list of file paths that contain the key string outside of comments.
+      List[str]: A list of paths to files that contain the key string outside of comments.
   """
   filtered_files = []
   for file_path in files:
