@@ -19,7 +19,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
     // Nacos configuration
     nacosConfig := NacosConfig{
-        ServerIP:   "10.105.10.110", // Replace with your Nacos server IP
+        ServerIP:   "10.105.211.71", // Replace with your Nacos server IP
         ServerPort: 8848,        // Replace with your Nacos server Port
         Namespace:  "public",    // Replace with your Nacos Namespace
     }

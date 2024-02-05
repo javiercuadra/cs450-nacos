@@ -37,7 +37,7 @@ func discoverHelloService(namingClient naming_client.INamingClient) (string, err
 func main() {
     // Nacos server configuration
     sc := []constant.ServerConfig{
-        *constant.NewServerConfig("10.105.10.110", 8848),
+        *constant.NewServerConfig("10.105.211.71", 8848),
     }
 
     // Client configuration

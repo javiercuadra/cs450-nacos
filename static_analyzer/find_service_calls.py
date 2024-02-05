@@ -115,9 +115,6 @@ def find_service_calls(files: List[str], wrapper_name: str, wrapper_data: SDKFun
         target_module = module_dict[service_name]
         service_call_dict.update({callee_module_name: target_module})
 
-
-  for key, value in service_call_dict.items():
-    print(f"module {key} calls module {value}")
   return service_call_dict
 
 

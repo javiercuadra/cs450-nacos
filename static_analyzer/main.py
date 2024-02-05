@@ -25,8 +25,8 @@ def define_directory_path() -> str:
   """
 
   # Default directory if user just wants to test our parser
-  directory_path: str = "./configuration-main"
-  #directory_path: str = "./example"
+  
+  directory_path: str = "./example"
 
   # Check if user gave a different directory
   if len(sys.argv) == 2:
@@ -189,6 +189,7 @@ def find_service_discovery(sdk_function_wrapper_mappings: Dict[str, SDKFunctionW
 
 """
   service_call_dict: Dict[str, str] = {}
+  print("\n\nFind all the service discovery calls in this directory")
 
   for key, value in sdk_function_wrapper_mappings.items():
       wrapper_function_files: List[str] = filter_files_with_str(go_files, key)
@@ -218,7 +219,13 @@ if __name__ == "__main__":
 
   service_discover_wrapper_mappings: Dict[str, SDKFunctionWrapperMapping] = find_wrapper_functions(nacos_files, "SelectInstance")
   
+  
   service_discovery_calls = find_service_discovery(service_discover_wrapper_mappings, module_dict)
+
+    
+  for key, value in service_discovery_calls.items():
+    print(f"The {key} module uses Nacos to discover the {service_dict[value].service_name} service in the {value} module ")
+
 
 
 
