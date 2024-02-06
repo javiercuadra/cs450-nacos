@@ -42,7 +42,7 @@ def __map_args_to_parameter(args: List[str], index_map: Dict[str, int]) -> Tuple
   """
 
   serviceName = args[index_map["ServiceName"]]
-  ip = args[index_map["Ip"]]
+  ip = args[index_map["Ip"]].replace('"', "")
   port = args[index_map["Port"]]
 
   return (serviceName, ip, port)

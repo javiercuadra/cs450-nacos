@@ -9,3 +9,15 @@
 2024-02-05T11:09:12.585-0600	[34mINFO[0m	naming_client/push_receiver.go:81	udp server start, port: 54989
 2024-02-05T11:09:12.585-0600	[34mINFO[0m	util/common.go:94	Local IP:10.105.211.71
 2024-02-05T11:09:12.612-0600	[34mINFO[0m	naming_client/host_reactor.go:100	service not found in cache DEFAULT_GROUP@@HelloService
+2024-02-05T13:45:04.474-0600	[34mINFO[0m	clients/client_factory.go:60	logDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/log>   cacheDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/cache>
+2024-02-05T13:45:04.475-0600	[34mINFO[0m	naming_client/push_receiver.go:81	udp server start, port: 55862
+2024-02-05T13:45:04.475-0600	[34mINFO[0m	util/common.go:94	Local IP:10.105.211.71
+2024-02-05T13:45:04.490-0600	[34mINFO[0m	naming_client/host_reactor.go:100	service not found in cache DEFAULT_GROUP@@HelloService
+2024-02-05T14:07:22.765-0600	[34mINFO[0m	clients/client_factory.go:60	logDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/log>   cacheDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/cache>
+2024-02-05T14:07:22.766-0600	[34mINFO[0m	naming_client/push_receiver.go:81	udp server start, port: 55727
+2024-02-05T14:07:22.766-0600	[34mINFO[0m	util/common.go:94	Local IP:10.105.211.71
+2024-02-05T14:07:22.790-0600	[34mINFO[0m	naming_client/host_reactor.go:100	service not found in cache DEFAULT_GROUP@@HelloService
+2024-02-05T14:07:47.473-0600	[34mINFO[0m	clients/client_factory.go:60	logDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/log>   cacheDir:</Users/davidhu0/Desktop/cs450-nacos/example/callerService/cache>
+2024-02-05T14:07:47.474-0600	[34mINFO[0m	naming_client/push_receiver.go:81	udp server start, port: 55366
+2024-02-05T14:07:47.474-0600	[34mINFO[0m	util/common.go:94	Local IP:10.105.211.71
+2024-02-05T14:07:47.489-0600	[34mINFO[0m	naming_client/host_reactor.go:100	service not found in cache DEFAULT_GROUP@@HelloService
