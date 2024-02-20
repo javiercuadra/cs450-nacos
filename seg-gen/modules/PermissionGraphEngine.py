@@ -54,8 +54,8 @@ Example of serviceGraph:
                        }, 
       "serviceNode4": {
                         "adjList": [] 
-                       }, 
-    ] 
+                       }
+     ] 
      
 """ 
 
@@ -201,7 +201,6 @@ class PermissionGraph:
             # Case 3: Create multiple service nodes 
             case _: 
                 formerService: str = "null" 
-
                 for m in manifests: 
 
                     service: str = m["service"] 
@@ -219,8 +218,14 @@ class PermissionGraph:
 
         pass 
 
+    def dfs(self, curr: defaultdict, visited: set, path: set, ) -> None: 
+        # Including cycle detection 
+        if (
+        
+
     # TODO topSort()
     def topSort(self) -> None: 
+
         """ 
         params: 
         - None 
@@ -229,8 +234,15 @@ class PermissionGraph:
         - None 
         
         desc: 
-        - Performs a topological sorting of the 
+        - Performs a topological sorting of the service names and 
+        their version
         """ 
+        
+        finalSort: List[tuple] = [] 
+        path: set = set(), visited: set = set()
+
+
+
         pass 
 
 

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>autoarmor policy generation worklog</title>
+</head>
+<body>
+    <!-- Your content goes here -->
+    <header>
+        <h1>cs450 worklog</h1>
+    </header>
+    <main style="width: 500px">
+        <section>
+	  <h2> monday, february 12</h2>  
+	  <h3> subproject 1</h3> 
+	  <p> 
+	  today, i plan on implementing a naive version of the 
+	  topological sorting algorithm 
+	  </p> 
+	  <h3> subproject 2</h3> 
+	  <p> 
+	  get started on the onboarding process. 
+	  <ul> 
+	    <li> install frida tools</li> 
+	  </ul>
+	  </p> 
+		
+            <h2>saturday, february 10 (part 2)</h2>
+	    <p>
+	    i am about to do some work on the PermissionGraphEngine. it looks like I am going to spending 
+	    a lot of time on it, since I don't *really* know how it works in terms of actually generating 
+	    graphs and whatnot. 
+	    </p>
+	    <ol>
+		    <li>i think the move honestly is to just duplicate an existing .json file and 
+			    then just try and build a graph from it </li> 
+	    </ol> 
+	    <h3>progress on PermissionGraphEngine</h3> 
+	    <ol>  
+		    <li> created new `Node` and `Edge` objects </li>  
+		    <li> created logic for parsing the manifest file and creating graph nodes </li> 
+	    </ol> 
+	    <h3> todo for PermissionGraphEngine </h3>
+	    <ol>  
+		    <li> still need to create graph edges for the different types of edges </li> 
+		    <li> still need to refactor code in order to utilie `Node` and `Edge` objects since they're goated </li> 
+	    </ol> 
+            <h2>saturday, february 10 (part 1)</h2>
+            <p>created engine architecture:</p>
+	    <ol> 
+		    <li> <b>DONE</b> ManifestParser: parses a json manifest file</li>
+		    <li>PermissionGraphEngine: generates a permission graph from manifest</li>
+		    <li>PolicyGenerationEngine: generates microsegmentation policies from permission graph</li>
+	    </ol> 
+        </section>
+    </main>
+</body>
+</html>
+
