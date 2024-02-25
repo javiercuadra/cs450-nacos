@@ -62,7 +62,8 @@ Example of serviceGraph:
 import os 
 import sys 
 import json 
-import PermissionGraphObjects.Node, PermissionGraphObjects.Edge
+from PermissionGraphObjects.Node import Node 
+from PermissionGraphObjects.Edge import Edge 
 from collections import defaultdict
 from typing import * 
 
@@ -81,54 +82,62 @@ class PermissionGraph:
 
         attributes: 
         - `List[defaultdict] PermissionGraph.manifests`: 
-        - `defaultdict self.rawGraph`: List of all nodes N_{s} and N_{v} within G 
-        - `defaultdict self.serviceGraph`: Hierarchal mapping of N_{s} and N_{v} within G 
+                    List of 
+
+        - `defaultdict self.rawGraph`: 
+                    List of all nodes N_{s} and N_{v} within G 
+
+        - `defaultdict self.serviceGraph`: 
+                    Hierarchal mapping of N_{s} and N_{v} within G 
         """
         manifests.sort(key = lambda a: a["service"]) 
 
         self.manifests: List[defaultdict] = manifests 
         self.rawGraph: defaultdict = {} 
         self.serviceGraph: defaultdict = {} 
+        self.sortedGraph = []
         return None 
 
-    def mapManifest(self, manifest: defaultdict, makeServiceNode: bool) -> None: 
-        """ 
+    # mapServiceNode() 
+    def mapServiceNode(self, manifest: defaultdict) -> None: 
+        """
         params: 
-        - defaultdict manifest: A manifest file 
-        - bool makeServiceNode: Determines whether or not we should make (i) a 
-        service node or (ii) a verison node 
-        """ 
+        - None 
+
+        desc:
+        Creates a service node as well as creates a corresponding 
+        """
         serviceName, versionName, requests = (manifest["service"], 
                                               manifest["version"], 
                                               manifest["requests"])
+        # Init Service Node Object 
+        currentNode = Node(serviceName, 1) # 1 == SERVICE_NODE
+        self.serviceGraph[serviceName] = currentNode
+        pass
 
-        match makeServiceNode: 
-            # Case 1: (makeServiceNode == 1) -> Add entry into service graph + 
-            # make node in raw graph + add edges 
-            case True: 
-                if (serviceName in self.serviceGraph):   
-                    return None 
+    # mapVersionNode()
+    def mapVersionNode(self, manifest: defaultdict) -> None: 
+        """
 
-                else: 
-                    self.serviceGraph[serviceName]: defaultdict = {"adjList" : {} 
-                                                                   } # adjList 
-                    self.rawGraph[serviceName]: defaultdict = {"version": [], 
-                                                               "adjList": []
-                                                               }
-                    self.mapRequests(serviceName, versionName, requests)
-            # Case 2: (makeServiceNode == 0) -> Create version node + add edges 
-            case False: 
-                if (serviceName not in self.serviceGraph 
-                    or serviceName not in self.rawGraph): 
-                    raise Exception(f"No entry exists for {serviceName}")
+        desc: 
+        Creates a version node for a given service node 
+        """
+        serviceName, versionName, requests = (manifest["service"], 
+                                              manifest["version"], 
+                                              manifest["requests"])
+        
+        # Find corresponding service node 
+        try: 
+            serviceNode = self.serviceGraph[serviceName] 
+        except: 
+            raise Exception(f"[DEBUG] Tried to add a version node\
+                    without a service node {serviceName}")
 
-                else: 
-                    node = {"version": versionName, 
-                            "adjList": []
-                            }
-                    self.serviceGraph[serviceName]["children"].append(node) 
-                    self.mapRequests(serviceName, versionName, requests)
-        return None 
+
+        # Init Version Node Object 
+        currentNode = Node(serviceName, 2) # 2 == VERSION_NODE
+        self.serviceGraph[serviceName].addBelongingEdge()
+        pass
 
     # TODO mapRequests() 
     def mapRequests(self, serviceName: str, version: str, requests: List[defaultdict]) -> None: 
@@ -173,15 +182,19 @@ class PermissionGraph:
         - Generates permission graph from the `PermissionGraph.manifest` dict
         """ 
 
-        # Remark: The permission graph is generated utilizing the following 
-        # attributes: 
+        # Remark: The permission graph is generated utilizing 
+        # the following attributes: 
         # 
         # G = (N_{s}, N_{v}, E_{b}, E_{r}) where 
         # 
-        #   N_{s} (Service Node):    Generic service for microservice architecture  
-        #   N_{v} (Version Node):    Variation of N_{s} that can be invoked with varying permissions 
-        #   E_{b} (Belonging Edge):  An edge that connects N_{v} with its corresponding N_{s}
-        #   E_{r} (Request Edge):    An edge that connects N_{s1} with another N_{s2} 
+        #   N_{s} (Service Node):    
+        #     Generic service for microservice architecture  
+        #   N_{v} (Version Node):    
+        #     Variation of N_{s} that can be invoked with varying permissions 
+        #   E_{b} (Belonging Edge):  
+        #     An edge that connects N_{v} with its corresponding N_{s}
+        #   E_{r} (Request Edge):    
+        #     An edge that connects N_{s1} with another N_{s2} 
         # 
         # Plan: 
         #   1. Generate overarching service node
@@ -218,14 +231,27 @@ class PermissionGraph:
 
         pass 
 
-    def dfs(self, curr: defaultdict, visited: set, path: set, ) -> None: 
-        # Including cycle detection 
-        if (
+    def dfs(self, curr: defaultdict, visited: set, 
+            path: set, finalSort: set) -> bool: 
+        # Base Case 0: If visited -> return None 
+        if (curr in visited): 
+            return True 
+
+        # Base Case 1: If in same path -> return False 
+        if (curr in path): 
+            return False 
+
+        # Recurse through the rest of the graph 
+        for nei in adjList[curr]: 
+            dfs(curr=, visited=, path= )
+
+        
+        return True 
+
         
 
     # TODO topSort()
     def topSort(self) -> None: 
-
         """ 
         params: 
         - None 
@@ -241,8 +267,14 @@ class PermissionGraph:
         finalSort: List[tuple] = [] 
         path: set = set(), visited: set = set()
 
+        for node in graph: 
+            if (not dfs(node, visited, path, finalSort)): 
+                return False 
 
+        return True 
 
+    # renderGraph()
+    def renderGraph(self) -> None: 
         pass 
 
 
