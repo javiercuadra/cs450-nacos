@@ -11,11 +11,13 @@
 # Northwestern University 
 # 10 February 2024 
 
+# Python library import 
 import os 
 import sys 
 import json 
 from collections import defaultdict
-from typing import *  # import typing because I like type hints, but I also like python 
+from typing import *  # Type hints for Python 
+from enum import Enum
 
 
 class ManifestParser: 
@@ -32,6 +34,7 @@ class ManifestParser:
 
         return None 
 
+    # ManifestParser.ManifestParser.parse()
     def parse(self) -> None: 
         """  
         params: 
@@ -50,4 +53,6 @@ class ManifestParser:
             self.finalDict = json.loads(f)
 
         return None 
+
+
 

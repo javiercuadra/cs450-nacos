@@ -59,13 +59,16 @@ Example of serviceGraph:
      
 """ 
 
+# Python library imports
 import os 
 import sys 
 import json 
-from PermissionGraphObjects.Node import Node 
-from PermissionGraphObjects.Edge import Edge 
 from collections import defaultdict
 from typing import * 
+
+# Custom imports 
+from PermissionGraphObjects.Node import Node, Edge, parseRequestName, parseRequestType, RequestType
+import ManifestParser
 
 class PermissionGraph: 
     def __init__(self, manifests: List[defaultdict]) -> None: 
@@ -82,24 +85,25 @@ class PermissionGraph:
 
         attributes: 
         - `List[defaultdict] PermissionGraph.manifests`: 
-                    List of 
+                    List of json-ified manifest files that will
+                    be turned into a permission graph. 
 
         - `defaultdict self.rawGraph`: 
-                    List of all nodes N_{s} and N_{v} within G 
+                    List of all nodes N_{s} and N_{v} within G.
 
         - `defaultdict self.serviceGraph`: 
-                    Hierarchal mapping of N_{s} and N_{v} within G 
+                    Hierarchal mapping of N_{s} and N_{v} within G.
         """
         manifests.sort(key = lambda a: a["service"]) 
 
         self.manifests: List[defaultdict] = manifests 
-        self.rawGraph: defaultdict = {} 
+        # self.rawGraph: defaultdict = {} 
         self.serviceGraph: defaultdict = {} 
         self.sortedGraph = []
         return None 
 
-    # mapServiceNode() 
-    def mapServiceNode(self, manifest: defaultdict) -> None: 
+    # PermissionGraph.mapServiceNode() 
+    def mapServiceNode(self, service: str) -> None: 
         """
         params: 
         - None 
@@ -107,24 +111,20 @@ class PermissionGraph:
         desc:
         Creates a service node as well as creates a corresponding 
         """
-        serviceName, versionName, requests = (manifest["service"], 
-                                              manifest["version"], 
-                                              manifest["requests"])
         # Init Service Node Object 
-        currentNode = Node(serviceName, 1) # 1 == SERVICE_NODE
-        self.serviceGraph[serviceName] = currentNode
+        currentNode = Node(service, 1) # 1 == SERVICE_NODE
+        self.serviceGraph[service] = currentNode
         pass
 
-    # mapVersionNode()
-    def mapVersionNode(self, manifest: defaultdict) -> None: 
+    # PermissionGraph.mapVersionNode()
+    def mapVersionNode(self, service: str, version: str) -> None: 
         """
 
         desc: 
         Creates a version node for a given service node 
         """
-        serviceName, versionName, requests = (manifest["service"], 
-                                              manifest["version"], 
-                                              manifest["requests"])
+        serviceName, versionName = (manifest["service"], 
+                                    manifest["version"])
         
         # Find corresponding service node 
         try: 
@@ -139,38 +139,62 @@ class PermissionGraph:
         self.serviceGraph[serviceName].addBelongingEdge()
         pass
 
-    # TODO mapRequests() 
-    def mapRequests(self, serviceName: str, version: str, requests: List[defaultdict]) -> None: 
+    # TODO PermissionGraph.mapRequests() 
+    def mapRequests(self, serviceName: str, version: str, 
+                    requests: List[defaultdict]) -> None: 
         """
         params: 
-        - str serviceName: The name of the service that we are adding nodes to 
-        - str version: The version of the service that we are adding nodes to 
+        - str self.serviceName: 
+                The name of the service that we are adding nodes to 
+        - str self.version: 
+                The version of the service that we are adding nodes to 
+        - str self.requests: 
+                The version of the service that we are adding nodes to 
 
         returns: 
         - None 
 
         desc: 
-        This is a function that maps requests as one of two edges in the permission 
-        graph: 
-        - E_{b}: Belonging Edge (Edge that connects a version node to a service node) 
-        - E_{r}: Request Edge (Edge that connects a service to another service) 
+        This is a function that maps requests as one of two edges 
+        in the permission graph: 
+        - E_{b}: Belonging Edge (Edge that connects a version node to 
+        a service node) 
+        - E_{r}: Request Edge (Edge that connects a service to 
+        another service) 
         """
 
-        if (serviceName not in self.serviceGraph 
-            or serviceName not in self.rawGraph): 
-            raise Exception(f"No entry exists for {serviceName}")
+        currentService = serviceName 
 
-        else: 
-            pass
-            # service = self.serviceGraph[serviceName][
-            # self.
+        try:
+            currentService: Node = self.serviceGraph[serviceName]
+        except: 
+            raise ValueError(f"[DEBUG] No entry exists for {serviceName}")
 
-        
+
+        # TODO work on the request engine!!!
+        for r in requests: 
+            rName: str = ManifestParser.parseRequestName(r) 
+            rType: int = ManifestParser.parseRequestType(rName)
+
+            # If not inter-service request -> continue 
+            # 
+            # TODO Will add database fnality later, since unsure how to 
+            # add databases as nodes 
+            if (rType != RequestType(1)): 
+                continue
+
+            # Otherwise, add an edge 
+            try: 
+                dst = self.serviceGraph[rName]
+                newEdge = currentService.addRequestEdge(dst, RequestType(1))
+
+            except: 
+                raise ValueError(f"[DEBUG] Unable to find destination service for {rName}")
 
         pass 
 
-    # generateGraph() 
-    def generateGraph(self) -> None: 
+    # PermissionGraph.generateNodes() 
+    def generateNodes(self) -> None: 
         """ 
         params: 
         - None 
@@ -179,7 +203,7 @@ class PermissionGraph:
         - None 
 
         desc: 
-        - Generates permission graph from the `PermissionGraph.manifest` dict
+        - Generates permission graph from `PermissionGraph.manifest` List[defaultdict]
         """ 
 
         # Remark: The permission graph is generated utilizing 
@@ -190,7 +214,7 @@ class PermissionGraph:
         #   N_{s} (Service Node):    
         #     Generic service for microservice architecture  
         #   N_{v} (Version Node):    
-        #     Variation of N_{s} that can be invoked with varying permissions 
+        #     Variation of N_{s} that may be invoked by other permissions 
         #   E_{b} (Belonging Edge):  
         #     An edge that connects N_{v} with its corresponding N_{s}
         #   E_{r} (Request Edge):    
@@ -198,7 +222,9 @@ class PermissionGraph:
         # 
         # Plan: 
         #   1. Generate overarching service node
-        #   2. Generate corresponding version nodes 
+        #   2. Generate corresponding version nodes u
+
+        manifests = self.manifests
 
         match len(manifests): 
             # Case 1: len(manifests) == 0 -> Throw exception 
@@ -208,29 +234,48 @@ class PermissionGraph:
             # Case 2: len(manifests) == 1 -> Create service node and attach version + edges
             case 1: 
                 service = self.manifests[0]
-                self.mapManifest(service, True)
-                self.mapManifest(service, False) 
+                self.mapServiceNode(service, True)
+                self.mapVersionNode(service, False) 
 
             # Case 3: Create multiple service nodes 
             case _: 
-                formerService: str = "null" 
                 for m in manifests: 
 
                     service: str = m["service"] 
-                    requests: List[defaultdict] = m["requests"] 
-                    # Not in service graph -> Create service node + version node + edges 
-                    if (service != formerService): 
-                        self.mapManifest(service, True) 
-                        self.mapManifest(service, False) 
-                        # self.mapRequests() 
+                    version: str = m["version"]
+                    # Not in service graph -> Create service node + version node 
+                    if (service not in self.serviceGraph): 
+                        self.mapServiceNode(service) 
+                        self.mapVersionNode(service, version) 
 
-                    # Otherwise -> Create new version node 
+                    # Otherwise, create new version node 
                     else: 
                         self.mapManifest(service, False) 
-                        # self.mapRequests()
 
-        pass 
+    # PermissionGraph.generateEdges()
+    def generateEdges(self) -> None: 
+        """
+        params: 
+        - None 
 
+        returns: 
+        - None 
+
+        desc: 
+        - Generates edges for the permission graph from  
+        `PermissionGraph.manifest` List[defaultdict]
+        """
+
+        manifests = self.manifests
+        for m in manifests: 
+            service: str = m["service"]
+            version: str = m["version"]
+            requests: str = m["requests"]
+
+            self.mapRequests(service, version, requests)
+
+
+    # PermissionGraph.dfs()
     def dfs(self, curr: defaultdict, visited: set, 
             path: set, finalSort: set) -> bool: 
         # Base Case 0: If visited -> return None 
@@ -242,15 +287,15 @@ class PermissionGraph:
             return False 
 
         # Recurse through the rest of the graph 
-        for nei in adjList[curr]: 
-            dfs(curr=, visited=, path= )
+        # for nei in adjList[curr]: 
+        #     dfs(curr=, visited=, path= )
 
         
         return True 
 
         
 
-    # TODO topSort()
+    # TODO PermissionGraph.topSort()
     def topSort(self) -> None: 
         """ 
         params: 
@@ -260,12 +305,13 @@ class PermissionGraph:
         - None 
         
         desc: 
-        - Performs a topological sorting of the service names and 
-        their version
+        - Performs a topological sorting of the PermissionGraph by 
+        prioritizing service nodes first, then their versions 
         """ 
         
         finalSort: List[tuple] = [] 
-        path: set = set(), visited: set = set()
+        path: set = set()
+        visited: set = set()
 
         for node in graph: 
             if (not dfs(node, visited, path, finalSort)): 
@@ -273,7 +319,7 @@ class PermissionGraph:
 
         return True 
 
-    # renderGraph()
+    # TODO renderGraph()
     def renderGraph(self) -> None: 
         pass 
 

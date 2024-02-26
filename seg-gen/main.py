@@ -5,16 +5,26 @@
 # Northwestern University 
 # 10 February 2024 
 
+# Necessary Imports
 import os 
 import sys 
 import json 
-import modules
 from collections import defaultdict 
-import xml.etree.ElementTree as ET 
 from typing import * 
 
-def main(): 
-    pass 
+# Custom Imports :)
+from modules.ManifestParser import ManifestParser
+from modules.PermissionGraphEngine import PermissionGraph
+from modules.PolicyGeneratorEngine import PolicyGenerator
+
+
+
+# import xml.etree.ElementTree as ET 
+
+def main(filename: str): 
+    parser = ManifestParser(filename)
+    parser.parse()
+    # print(parser.finalDict["requests"])
 
 if (__name__ == "__main__"):  
     if (len(sys.argv) < 2): 
@@ -24,7 +34,7 @@ if (__name__ == "__main__"):
 
     # ... 
 
-    main()
+    main(filename)
 
 
 

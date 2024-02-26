@@ -11,16 +11,19 @@
 # Northwestern University 
 # 10 February 2024 
 
+# Python library imports 
 import os 
 import sys 
 import json 
 import pyyaml 
 from collections import defaultdict 
-import xml.etree.ElementTree as ET 
 from typing import * 
 
+# Local imports 
+from PermissionGraphEngine import PermissionGraph
+
 class PolicyGenerator: 
-    def __init__(self, serviceCall: List[str]) -> None: 
+    def __init__(self, g: PermisisonGraph) -> None: 
         """
         params: 
         - serviceCalls: An array of string arrays 
@@ -36,15 +39,17 @@ class PolicyGenerator:
 
 
         self.finalPolicy: defaultdict = {  
-                                         'apiVersion' : 'nacos/v2', 
+                                         'apiVersion' : 'kubernetes/v2', 
                                          'policyType' : 'NetworkPolicy', 
                                          'metadata'   : self.serviceMetadata,
                                          'spec'       : self.policySpecification
                                          } 
 
-        self.serviceCalls: List[str] = serviceCalls 
-        self. 
+        self.graph: PermissionGraph = graph
         return None 
+
+    # getEdges 
+    def 
 
     # TODO generateMetadata()
     def generateMetadata(self) -> None: 
@@ -117,4 +122,3 @@ class PolicyGenerator:
 
         pass 
 
-Automatic Policy Generation for Inter-Service Access Control of Microservices
